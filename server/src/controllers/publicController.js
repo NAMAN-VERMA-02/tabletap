@@ -6,6 +6,8 @@ const Order = require('../models/Order');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 const { priceOrder } = require('../utils/money');
+const { publicOrder } = require('../utils/orderView');
+const { emitOrderNew } = require('../socket');
 
 // Resolves a QR token to its (active) table and restaurant.
 async function resolveTable(qrToken) {
@@ -15,22 +17,6 @@ async function resolveTable(qrToken) {
   if (!restaurant) throw new ApiError(404, 'Restaurant not found');
   return { table, restaurant };
 }
-
-// Only what a diner needs to see; no internal ids beyond what ordering requires.
-const publicOrder = (order) => ({
-  trackingToken: order.trackingToken,
-  tableNumber: order.tableNumber,
-  items: order.items.map(({ name, price, qty, isVeg, note }) => ({ name, price, qty, isVeg, note })),
-  subtotal: order.subtotal,
-  taxPercent: order.taxPercent,
-  tax: order.tax,
-  total: order.total,
-  customerName: order.customerName,
-  note: order.note,
-  status: order.status,
-  statusHistory: order.statusHistory,
-  createdAt: order.createdAt,
-});
 
 // GET /api/v1/public/t/:qrToken — the menu a diner sees after scanning.
 const getTableMenu = asyncHandler(async (req, res) => {
@@ -93,7 +79,7 @@ const placeOrder = asyncHandler(async (req, res) => {
     note,
   });
 
-  // Step 6: emit `order:new` to the kitchen display over Socket.io here.
+  emitOrderNew(order.toObject());
 
   res.status(201).json({ success: true, order: publicOrder(order) });
 });

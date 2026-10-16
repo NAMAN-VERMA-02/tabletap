@@ -9,6 +9,7 @@ export default defineConfig({
     // In dev, /api calls go to the Express server, so cookies stay same-origin.
     proxy: {
       '/api': 'http://localhost:5000',
+      '/socket.io': { target: 'http://localhost:5000', ws: true },
     },
   },
 });

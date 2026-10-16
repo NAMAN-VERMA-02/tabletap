@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 const sections = [
   { name: 'Menu', to: '/dashboard/menu', ready: true },
   { name: 'Tables & QR codes', to: '/dashboard/tables', ready: true },
-  { name: 'Kitchen display' },
+  { name: 'Kitchen display', to: '/kitchen', ready: true },
   { name: 'Orders' },
   { name: 'Analytics' },
   { name: 'Staff' },

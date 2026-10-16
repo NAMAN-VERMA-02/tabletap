@@ -5,11 +5,14 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const connectDB = require('../src/config/db');
 const env = require('../src/config/env');
 const app = require('../src/app');
+const { initSocket } = require('../src/socket');
 
 (async () => {
   const mongo = await MongoMemoryServer.create();
   await connectDB(mongo.getUri('tabletap'));
-  http.createServer(app).listen(env.port, () => {
+  const server = http.createServer(app);
+  initSocket(server);
+  server.listen(env.port, () => {
     console.log(`API (in-memory DB) running on http://localhost:${env.port}`);
   });
 

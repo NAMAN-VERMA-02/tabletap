@@ -9,6 +9,7 @@ import Tables from './pages/Tables';
 import QrSheet from './pages/QrSheet';
 import TableMenu from './pages/TableMenu';
 import OrderStatus from './pages/OrderStatus';
+import Kitchen from './pages/Kitchen';
 import DashboardLayout from './components/DashboardLayout';
 
 export default function App() {
@@ -28,6 +29,8 @@ export default function App() {
           <Route path="menu" element={<Menu />} />
           <Route path="tables" element={<Tables />} />
         </Route>
+        {/* Full-screen kitchen display (owner and staff) */}
+        <Route path="/kitchen" element={<Kitchen />} />
       </Route>
 
       {/* Full-page print view, outside the dashboard chrome */}

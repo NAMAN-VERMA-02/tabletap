@@ -18,8 +18,9 @@
 - [ ] Image upload to Cloudinary (image URLs work for now)
 - [x] Tables CRUD with QR codes (download, regenerate) and a printable QR sheet
 - [x] Public QR menu (search, veg filter), saved cart, and order placement (prices recalculated on the server)
-- [x] Order status page for diners (polls every 5s for now)
-- [ ] Real-time kitchen display (Socket.io), which will also make diner status updates instant
+- [x] Live kitchen display (Socket.io): New → Preparing → Ready columns, order timers, late-order highlight, new-order chime
+- [x] Live order status for diners (instant over Socket.io, with a slow poll as backup)
+- [x] Strict status rules: orders only move forward, and only the owner can cancel
 - [ ] Analytics dashboard (MongoDB aggregation)
 - [ ] Staff management
 
@@ -91,6 +92,12 @@ cd server && npm test
 | GET | `/api/v1/public/t/:qrToken` | Public (QR) | Restaurant, table and available menu |
 | POST | `/api/v1/public/t/:qrToken/orders` | Public (QR) | Place an order (rate-limited) |
 | GET | `/api/v1/public/orders/:trackingToken` | Public | Order status for the diner |
+
+| GET | `/api/v1/orders?status=&date=&page=&limit=` | Owner, staff | Order history with filters and pagination |
+| GET | `/api/v1/orders/active` | Owner, staff | Open orders for the kitchen, oldest first |
+| PATCH | `/api/v1/orders/:id/status` | Owner, staff (cancel: owner) | Move an order: received → preparing → ready → served |
+
+**Real-time events (Socket.io):** staff sockets are authenticated with the same auth cookie and join `restaurant:<id>`, which gets `order:new` and `order:updated`. Diners join `order:<trackingToken>` and get only their own order's `order:updated`, as the public view.
 
 **Ordering safety:** the server ignores any price the browser sends and prices every order from the database. It copies each dish's name and price into the order, so later menu edits never change old bills. It rejects sold-out dishes and dishes from other restaurants. Tracking links use a random token rather than the database id.
 

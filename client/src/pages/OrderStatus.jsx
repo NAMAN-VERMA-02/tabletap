@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import api, { errorMessage } from '../lib/api';
 import { formatMoney } from '../lib/format';
 import { readJSON } from '../lib/storage';
+import { connectSocket } from '../lib/socket';
 import VegMark from '../components/menu/VegMark';
 
 const STEPS = [
@@ -12,8 +13,9 @@ const STEPS = [
   { key: 'served', label: 'Served', hint: 'Enjoy your meal! 🍽️' },
 ];
 
-// Polls for now; the kitchen-display step switches this to live Socket.io updates.
-const POLL_MS = 5000;
+// Live updates come over Socket.io; this slow poll is only a safety net.
+const POLL_MS = 30000;
+const isFinal = (status) => ['served', 'cancelled'].includes(status);
 
 export default function OrderStatus() {
   const { trackingToken } = useParams();
@@ -24,22 +26,36 @@ export default function OrderStatus() {
   useEffect(() => {
     let timer;
     let stopped = false;
+    const socket = connectSocket();
 
     const load = async () => {
+      clearTimeout(timer);
       try {
         const res = await api.get(`/public/orders/${trackingToken}`);
         if (stopped) return;
         setData(res.data);
-        if (!['served', 'cancelled'].includes(res.data.order.status)) timer = setTimeout(load, POLL_MS);
+        if (!isFinal(res.data.order.status)) timer = setTimeout(load, POLL_MS);
       } catch (err) {
         if (!stopped) setError(errorMessage(err));
       }
     };
-    load();
+
+    // (Re)join this order's room on every connect, then catch up on anything missed.
+    socket.on('connect', () => {
+      socket.emit('order:subscribe', trackingToken);
+      load();
+    });
+    socket.on('order:updated', (order) => {
+      // A logged-in staff member's socket also gets every order in the restaurant; ignore the rest.
+      if (order.trackingToken !== trackingToken) return;
+      setData((prev) => (prev ? { ...prev, order } : prev));
+      if (isFinal(order.status)) clearTimeout(timer);
+    });
 
     return () => {
       stopped = true;
       clearTimeout(timer);
+      socket.disconnect();
     };
   }, [trackingToken]);
 
