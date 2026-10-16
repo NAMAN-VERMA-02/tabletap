@@ -3,9 +3,9 @@ import { formatMoney } from '../../lib/format';
 
 // Chart styling: one brand hue for single-series charts (no legend needed; the title names it),
 // thin bars rounded at the data end, hairline recessive grid, text in neutral ink.
-const BAR = '#ea580c';
-const GRID = '#e7e5e4';
-const INK_MUTED = '#78716c';
+const BAR = '#a5672e'; // copper: passes chroma + contrast checks on the stone-50 surface
+const GRID = '#ddd8cc';
+const INK_MUTED = '#7f7562';
 const tick = { fill: INK_MUTED, fontSize: 12 };
 
 const compact = (n) => new Intl.NumberFormat('en-IN', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
@@ -13,7 +13,7 @@ const compact = (n) => new Intl.NumberFormat('en-IN', { notation: 'compact', max
 function ChartTooltip({ active, payload, label, format }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm shadow-md">
+    <div className="rounded-md border border-stone-200 bg-stone-50 px-3 py-2 text-sm shadow-md">
       <p className="text-stone-500">{label}</p>
       {payload.map((p) => (
         <p key={p.dataKey} className="font-semibold text-stone-900">{format(p.value, p.dataKey)}</p>
@@ -34,7 +34,7 @@ export function RevenueChart({ daily, currency }) {
         <XAxis dataKey="label" tick={tick} tickLine={false} axisLine={{ stroke: GRID }} interval="preserveStartEnd" minTickGap={16} />
         <YAxis tick={tick} tickLine={false} axisLine={false} width={44} tickFormatter={compact} allowDecimals={false} />
         <Tooltip
-          cursor={{ fill: '#f5f5f4' }}
+          cursor={{ fill: '#ece9e1' }}
           content={(props) => (
             <ChartTooltip
               {...props}
@@ -60,7 +60,7 @@ export function HourChart({ byHour }) {
         <XAxis dataKey="label" tick={tick} tickLine={false} axisLine={{ stroke: GRID }} interval={2} />
         <YAxis tick={tick} tickLine={false} axisLine={false} width={32} allowDecimals={false} />
         <Tooltip
-          cursor={{ fill: '#f5f5f4' }}
+          cursor={{ fill: '#ece9e1' }}
           content={(props) => (
             <ChartTooltip
               {...props}

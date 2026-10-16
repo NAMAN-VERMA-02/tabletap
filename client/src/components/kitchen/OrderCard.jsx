@@ -1,9 +1,9 @@
 import VegMark from '../menu/VegMark';
 
 const NEXT = {
-  received: { status: 'preparing', label: 'Start preparing', className: 'bg-amber-500 hover:bg-amber-600' },
-  preparing: { status: 'ready', label: 'Mark ready', className: 'bg-green-600 hover:bg-green-700' },
-  ready: { status: 'served', label: 'Served', className: 'bg-stone-800 hover:bg-stone-900' },
+  received: { status: 'preparing', label: 'Start preparing', className: 'bg-brand-600 hover:bg-brand-700' },
+  preparing: { status: 'ready', label: 'Mark ready', className: 'bg-green-700 hover:bg-green-800' },
+  ready: { status: 'served', label: 'Served', className: 'bg-stone-800 hover:bg-stone-950' },
 };
 
 function minutesSince(date, now) {
@@ -17,13 +17,13 @@ export default function OrderCard({ order, now, isOwner, busy, onMove, isNew }) 
 
   return (
     <article
-      className={`rounded-xl border-2 bg-white p-4 shadow-sm transition ${
-        late ? 'border-red-400' : 'border-stone-200'
+      className={`rounded-md border-2 bg-sand p-4 text-stone-800 shadow-lg transition ${
+        late ? 'border-red-500' : 'border-transparent'
       } ${isNew ? 'animate-[pulse_1s_ease-in-out_3]' : ''}`}
     >
       <header className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-2xl font-bold leading-none">T{order.tableNumber}</p>
+          <p className="display text-4xl leading-none">T{order.tableNumber}</p>
           {order.customerName && <p className="mt-1 text-sm text-stone-600">{order.customerName}</p>}
         </div>
         <span
@@ -55,7 +55,7 @@ export default function OrderCard({ order, now, isOwner, busy, onMove, isNew }) 
           <button
             onClick={() => onMove(order, next.status)}
             disabled={busy}
-            className={`btn flex-1 py-3 text-base text-white ${next.className}`}
+            className={`btn flex-1 py-3.5 text-white ${next.className}`}
           >
             {next.label}
           </button>

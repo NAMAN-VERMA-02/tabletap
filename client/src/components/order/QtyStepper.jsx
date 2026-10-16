@@ -1,25 +1,25 @@
 export default function QtyStepper({ qty, onChange, size = 'md' }) {
-  const pad = size === 'sm' ? 'px-2 py-0.5' : 'px-3 py-1.5';
+  const pad = size === 'sm' ? 'px-2.5 py-1' : 'px-3 py-2';
 
   if (qty === 0) {
     return (
       <button
         onClick={() => onChange(1)}
-        className={`rounded-lg border border-brand-600 bg-white font-semibold text-brand-700 hover:bg-brand-50 ${pad} text-sm`}
+        className={`eyebrow rounded-[4px] border border-stone-700 bg-stone-50 text-stone-800 shadow-sm transition hover:bg-stone-800 hover:text-stone-50 ${size === 'sm' ? 'px-3 py-1' : 'px-5 py-2'}`}
       >
-        ADD
+        Add
       </button>
     );
   }
 
   return (
-    <div className={`inline-flex items-center rounded-lg bg-brand-600 text-sm font-semibold text-white`}>
-      <button onClick={() => onChange(qty - 1)} className={`${pad} hover:bg-brand-700 rounded-l-lg`} aria-label="Remove one">−</button>
-      <span className="min-w-6 text-center" aria-live="polite">{qty}</span>
+    <div className="inline-flex items-center rounded-[4px] bg-stone-800 text-sm text-stone-50 shadow-sm">
+      <button onClick={() => onChange(qty - 1)} className={`${pad} rounded-l-[4px] hover:bg-stone-950`} aria-label="Remove one">−</button>
+      <span className="min-w-6 text-center tabular-nums" aria-live="polite">{qty}</span>
       <button
         onClick={() => onChange(qty + 1)}
         disabled={qty >= 20}
-        className={`${pad} hover:bg-brand-700 rounded-r-lg disabled:opacity-50`}
+        className={`${pad} rounded-r-[4px] hover:bg-stone-950 disabled:opacity-40`}
         aria-label="Add one"
       >
         +

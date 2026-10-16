@@ -59,7 +59,7 @@ export default function Orders() {
     <>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Order history</h2>
+          <h2 className="display text-5xl">Order history</h2>
           <p className="text-sm text-stone-600">{data ? `${data.total} ${data.total === 1 ? 'order' : 'orders'}` : '…'}</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -76,7 +76,7 @@ export default function Orders() {
         </div>
       </div>
 
-      <div className={`overflow-x-auto rounded-2xl border border-stone-200 bg-white ${loading ? 'opacity-60' : ''}`}>
+      <div className={`overflow-x-auto rounded-md border border-stone-200 bg-stone-50 ${loading ? 'opacity-60' : ''}`}>
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="border-b border-stone-200 bg-stone-50 text-stone-500">
             <tr>

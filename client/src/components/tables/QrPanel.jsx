@@ -46,7 +46,7 @@ export default function QrPanel({ table, onRegenerated }) {
 
   return (
     <div className="text-center">
-      <img src={qr.qr} alt={`QR code for table ${table.number}`} className="mx-auto w-64 rounded-lg border border-stone-200" />
+      <img src={qr.qr} alt={`QR code for table ${table.number}`} className="mx-auto w-64 rounded-md border border-stone-200" />
       <p className="mt-3 break-all text-xs text-stone-500">{qr.url}</p>
       <div className="mt-4 flex flex-wrap justify-center gap-2">
         <a href={qr.qr} download={`table-${table.number}-qr.png`} className="btn-primary">Download PNG</a>

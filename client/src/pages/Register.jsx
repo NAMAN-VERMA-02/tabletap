@@ -38,12 +38,12 @@ export default function Register() {
     <AuthLayout
       title="Set up your restaurant"
       subtitle="Create the owner account. You can add staff later."
-      footer={<>Already have an account? <Link to="/login" className="font-medium text-brand-600">Log in</Link></>}
+      footer={<>Already have an account? <Link to="/login" className="font-medium text-stone-800 underline underline-offset-4">Log in</Link></>}
     >
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-5">
         {fields.map((f) => (
           <label key={f.name} className="block">
-            <span className="mb-1 block text-sm font-medium">{f.label}</span>
+            <span className="eyebrow mb-2 block text-stone-500">{f.label}</span>
             <input
               name={f.name}
               type={f.type}
@@ -56,7 +56,7 @@ export default function Register() {
             />
           </label>
         ))}
-        <button type="submit" disabled={submitting} className="btn-primary w-full">
+        <button type="submit" disabled={submitting} className="btn-primary w-full py-3">
           {submitting ? 'Creating…' : 'Create restaurant'}
         </button>
       </form>

@@ -79,7 +79,7 @@ export default function Tables() {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Tables</h2>
+          <h2 className="display text-5xl">Tables</h2>
           <p className="text-sm text-stone-600">
             {activeCount} active {activeCount === 1 ? 'table' : 'tables'} · {totalSeats} seats
           </p>
@@ -99,7 +99,7 @@ export default function Tables() {
       </div>
 
       {tables.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-10 text-center text-stone-500">
+        <div className="rounded-md border border-dashed border-stone-300 bg-stone-50 p-10 text-center text-stone-500">
           No tables yet. {isOwner && 'Add one, then print its QR code and stick it on the table.'}
         </div>
       ) : (
@@ -107,14 +107,14 @@ export default function Tables() {
           {tables.map((t) => (
             <li
               key={t._id}
-              className={`flex flex-col rounded-2xl border bg-white p-4 ${
+              className={`flex flex-col rounded-md border bg-stone-50 p-4 ${
                 t.isActive ? 'border-stone-200' : 'border-dashed border-stone-300 opacity-60'
               }`}
             >
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-wide text-stone-500">Table</p>
-                  <p className="text-3xl font-bold">{t.number}</p>
+                  <p className="display text-5xl">{t.number}</p>
                 </div>
                 {!t.isActive && <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-600">Inactive</span>}
               </div>

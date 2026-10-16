@@ -1,25 +1,114 @@
 @import 'tailwindcss';
 
+/*
+  Design system: quiet, editorial hospitality look.
+  Warm stone surfaces, deep brown ink, thin serif headings, small tracked uppercase labels,
+  square photography, hairline dividers. The stone ramp is retuned so every existing
+  stone-* class picks up the warm palette automatically.
+*/
 @theme {
-  --color-brand-50: #fff7ed;
-  --color-brand-100: #ffedd5;
-  --color-brand-500: #f97316;
-  --color-brand-600: #ea580c;
-  --color-brand-700: #c2410c;
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
+
+  /* Warm neutral ramp (stone-700 is the main ink colour) */
+  --color-stone-50: #f4f2ec;
+  --color-stone-100: #ece9e1;
+  --color-stone-200: #ddd8cc;
+  --color-stone-300: #c9c2b2;
+  --color-stone-400: #a39a88;
+  --color-stone-500: #7f7562;
+  --color-stone-600: #645a49;
+  --color-stone-700: #4b4335;
+  --color-stone-800: #3a3329;
+  --color-stone-900: #29241d;
+  --color-stone-950: #1a1712;
+
+  /* Page background */
+  --color-sand: #e8e6df;
+
+  /* Bronze accent (focus rings, highlights, charts) */
+  --color-brand-50: #f6f1e7;
+  --color-brand-100: #eadfc9;
+  --color-brand-500: #9a7646;
+  --color-brand-600: #7f5f36;
+  --color-brand-700: #654b2b;
+
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Slow push-in on the hero photo */
+@keyframes heroZoom {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-sand font-sans text-stone-700;
+  }
+  ::selection {
+    @apply bg-brand-100 text-stone-900;
+  }
+}
+
+/* Thin, large serif used for headings */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+}
+
+/* Small tracked uppercase label ("eyebrow") */
+@utility eyebrow {
+  @apply text-xs font-medium uppercase tracking-[0.12em];
 }
 
 @utility input {
-  @apply w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+  @apply w-full rounded-[4px] border border-stone-300 bg-stone-50 px-3 py-2.5 text-sm text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-stone-600 focus:ring-2 focus:ring-brand-100;
 }
 
 @utility btn {
-  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex items-center justify-center gap-2 rounded-[4px] px-5 py-2.5 text-xs font-medium uppercase tracking-[0.1em] transition duration-300 disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 @utility btn-primary {
-  @apply btn bg-brand-600 text-white hover:bg-brand-700;
+  @apply btn bg-stone-700 text-stone-50 hover:bg-stone-900;
 }
 
 @utility btn-ghost {
-  @apply btn border border-stone-300 bg-white hover:bg-stone-100;
+  @apply btn border border-stone-300 bg-transparent text-stone-700 hover:border-stone-700;
+}
+
+/* Underlined text link with a little arrow, as used on editorial sites */
+@utility link-arrow {
+  @apply inline-flex items-center gap-2 border-b border-current pb-1 text-sm transition hover:gap-3;
+}
+
+/* Fade-up on scroll (toggled by the useReveal hook) */
+@utility reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.9s var(--ease-soft),
+    transform 0.9s var(--ease-soft);
+}
+@utility revealed {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

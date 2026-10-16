@@ -23,7 +23,7 @@ export default function CartSheet({ cart, currency, taxPercent, onPlace }) {
 
   return (
     <form onSubmit={submit} className="space-y-5">
-      <ul className="divide-y divide-stone-100">
+      <ul className="divide-y divide-stone-700/10">
         {cart.lines.map((l) => (
           <li key={l.menuItem} className="py-3">
             <div className="flex items-center gap-3">
@@ -35,7 +35,7 @@ export default function CartSheet({ cart, currency, taxPercent, onPlace }) {
               <QtyStepper qty={l.qty} size="sm" onChange={(q) => cart.setQty({ _id: l.menuItem }, q)} />
             </div>
             <input
-              className="mt-2 w-full rounded-md border border-transparent bg-stone-50 px-2 py-1 text-xs outline-none focus:border-stone-300"
+              className="mt-2 w-full rounded-md border border-transparent bg-stone-700/5 px-2 py-1.5 text-xs outline-none focus:border-stone-400"
               placeholder="Add a note (e.g. less spicy)"
               maxLength={100}
               value={l.note}
@@ -63,15 +63,15 @@ export default function CartSheet({ cart, currency, taxPercent, onPlace }) {
         />
       </div>
 
-      <dl className="space-y-1 rounded-xl bg-stone-50 p-4 text-sm">
+      <dl className="space-y-1.5 border-y border-stone-700/10 py-4 text-sm tabular-nums">
         <div className="flex justify-between"><dt>Subtotal</dt><dd>{money(cart.subtotal)}</dd></div>
         <div className="flex justify-between text-stone-600"><dt>Tax ({taxPercent}%)</dt><dd>{money(cart.tax)}</dd></div>
-        <div className="flex justify-between border-t border-stone-200 pt-2 text-base font-semibold">
+        <div className="flex justify-between border-t border-stone-700/10 pt-3 text-base font-medium text-stone-900">
           <dt>Total</dt><dd>{money(cart.total)}</dd>
         </div>
       </dl>
 
-      <button type="submit" disabled={placing} className="btn-primary w-full py-3 text-base">
+      <button type="submit" disabled={placing} className="btn-primary w-full py-4">
         {placing ? 'Placing order…' : `Place order · ${money(cart.total)}`}
       </button>
       <p className="text-center text-xs text-stone-500">Pay at the counter after your meal.</p>

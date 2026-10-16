@@ -21,8 +21,8 @@ const shortcuts = [
 
 function Card({ title, subtitle, children, className = '' }) {
   return (
-    <section className={`rounded-2xl border border-stone-200 bg-white p-5 ${className}`}>
-      <h3 className="font-semibold">{title}</h3>
+    <section className={`rounded-md border border-stone-200 bg-stone-50 p-5 ${className}`}>
+      <h3 className="display text-2xl">{title}</h3>
       {subtitle && <p className="text-sm text-stone-500">{subtitle}</p>}
       <div className="mt-4">{children}</div>
     </section>
@@ -31,9 +31,9 @@ function Card({ title, subtitle, children, className = '' }) {
 
 function Stat({ label, value, hint }) {
   return (
-    <div className="rounded-2xl border border-stone-200 bg-white p-4">
-      <p className="text-sm text-stone-500">{label}</p>
-      <p className="mt-1 text-2xl font-bold tabular-nums">{value}</p>
+    <div className="rounded-md border border-stone-200 bg-stone-50 p-4">
+      <p className="eyebrow text-stone-500">{label}</p>
+      <p className="display mt-2 text-4xl tabular-nums">{value}</p>
       {hint && <p className="mt-0.5 text-xs text-stone-500">{hint}</p>}
     </div>
   );
@@ -64,15 +64,15 @@ function Analytics() {
   return (
     <>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-lg font-semibold">Performance</h3>
-        <div className="inline-flex rounded-lg border border-stone-300 bg-white p-0.5" role="group" aria-label="Date range">
+        <h3 className="display text-3xl">Performance</h3>
+        <div className="inline-flex rounded-md border border-stone-300 bg-stone-50 p-0.5" role="group" aria-label="Date range">
           {RANGES.map((r) => (
             <button
               key={r.value}
               onClick={() => setRange(r.value)}
               aria-pressed={range === r.value}
               className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                range === r.value ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-100'
+                range === r.value ? 'bg-stone-800 text-stone-50' : 'text-stone-600 hover:bg-stone-100'
               }`}
             >
               {r.label}
@@ -136,17 +136,22 @@ export default function Dashboard() {
   const { user } = useAuth();
   const isOwner = user.role === 'owner';
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
   return (
     <>
-      <h2 className="text-2xl font-bold">Hi {user.name.split(' ')[0]} 👋</h2>
-      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {shortcuts.map((s) => (
-          <Link
-            key={s.name}
-            to={s.to}
-            className="rounded-xl border border-stone-200 bg-white px-4 py-3 transition hover:border-brand-500 hover:shadow-sm"
-          >
-            <p className="font-medium">{s.name}</p>
+      <p className="eyebrow text-stone-500">{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+      <h2 className="display mt-3 text-5xl sm:text-6xl">
+        {greeting}, {user.name.split(' ')[0]}.
+      </h2>
+      <div className="mt-8 grid grid-cols-2 gap-px overflow-hidden border border-stone-700/10 bg-stone-700/10 lg:grid-cols-4">
+        {shortcuts.map((s, i) => (
+          <Link key={s.name} to={s.to} className="group bg-sand px-5 py-5 transition hover:bg-stone-50">
+            <span className="text-xs tabular-nums text-stone-400">0{i + 1}</span>
+            <p className="mt-2 font-medium text-stone-800">
+              {s.name} <span className="inline-block transition group-hover:translate-x-1" aria-hidden>→</span>
+            </p>
             <p className="text-xs text-stone-500">{s.text}</p>
           </Link>
         ))}

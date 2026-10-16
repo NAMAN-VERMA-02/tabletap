@@ -59,8 +59,8 @@ export default function OrderStatus() {
     };
   }, [trackingToken]);
 
-  if (error) return <div className="grid min-h-screen place-items-center px-6 text-center font-medium">{error}</div>;
-  if (!data) return <div className="grid min-h-screen place-items-center text-stone-500">Loading your order…</div>;
+  if (error) return <div className="grid min-h-screen place-items-center bg-sand px-6 text-center"><p className="display text-3xl">{error}</p></div>;
+  if (!data) return <div className="grid min-h-screen place-items-center bg-sand text-stone-500">Loading your order…</div>;
 
   const { order, restaurant } = data;
   const money = (n) => formatMoney(n, restaurant?.currency);
@@ -70,72 +70,65 @@ export default function OrderStatus() {
   const fmtTime = (d) => new Date(d).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
   return (
-    <div className="mx-auto min-h-screen max-w-2xl bg-white pb-10">
-      <header className="bg-brand-600 px-4 pb-5 pt-6 text-white">
-        <p className="text-sm text-brand-100">{restaurant?.name} · Table {order.tableNumber}</p>
-        <h1 className="mt-1 text-2xl font-bold">
-          {cancelled ? 'Order cancelled' : STEPS[currentIdx]?.label}
-        </h1>
-        <p className="mt-1 text-sm text-brand-100">
-          {cancelled ? 'Please speak to the staff.' : STEPS[currentIdx]?.hint}
-        </p>
-      </header>
+    <div className="min-h-screen bg-sand pb-16">
+      <div className="mx-auto max-w-2xl px-5">
+        <header className="border-b border-stone-700/10 pb-10 pt-14 text-center">
+          <p className="eyebrow text-stone-500">
+            {restaurant?.name} · Table {order.tableNumber}
+          </p>
+          <h1 className="display mt-5 text-5xl sm:text-6xl">{cancelled ? 'Order cancelled' : STEPS[currentIdx]?.label}</h1>
+          <p className="mt-3 text-stone-600">{cancelled ? 'Please speak to the staff.' : STEPS[currentIdx]?.hint}</p>
+        </header>
 
-      {!cancelled && (
-        <ol className="px-6 py-6">
-          {STEPS.map((step, i) => {
-            const done = i <= currentIdx;
-            const at = timeOf(step.key);
-            return (
-              <li key={step.key} className="relative flex gap-4 pb-6 last:pb-0">
-                {i < STEPS.length - 1 && (
-                  <span className={`absolute left-[11px] top-6 h-full w-0.5 ${i < currentIdx ? 'bg-brand-600' : 'bg-stone-200'}`} />
-                )}
-                <span
-                  className={`relative z-10 grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold ${
-                    done ? 'bg-brand-600 text-white' : 'border-2 border-stone-300 bg-white'
-                  } ${i === currentIdx && order.status !== 'served' ? 'ring-4 ring-brand-100' : ''}`}
-                >
-                  {done && '✓'}
+        {!cancelled && (
+          <ol className="grid grid-cols-4 gap-2 py-10" aria-label="Order progress">
+            {STEPS.map((step, i) => {
+              const done = i <= currentIdx;
+              const current = i === currentIdx && order.status !== 'served';
+              const at = timeOf(step.key);
+              return (
+                <li key={step.key} className="text-center">
+                  <div className={`h-0.5 w-full transition-colors duration-700 ${done ? 'bg-stone-800' : 'bg-stone-700/15'}`}>
+                    {current && <div className="h-full w-1/2 animate-pulse bg-brand-500" />}
+                  </div>
+                  <p className={`mt-3 text-xs sm:text-sm ${done ? 'text-stone-800' : 'text-stone-400'}`}>{step.label}</p>
+                  <p className="mt-0.5 h-4 text-[11px] tabular-nums text-stone-500">{at ? fmtTime(at) : ''}</p>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+
+        <section className="border-t border-stone-700/10 pt-8">
+          <div className="flex items-baseline justify-between">
+            <h2 className="display text-3xl">Your order</h2>
+            {order.customerName && <p className="text-sm text-stone-500">{order.customerName}</p>}
+          </div>
+          <ul className="mt-5 divide-y divide-stone-700/10 text-sm">
+            {order.items.map((it, i) => (
+              <li key={i} className="flex items-start gap-3 py-3">
+                <span className="mt-0.5"><VegMark isVeg={it.isVeg} /></span>
+                <span className="flex-1">
+                  <span className="tabular-nums text-stone-500">{it.qty} ×</span> {it.name}
+                  {it.note && <span className="block text-xs italic text-stone-500">“{it.note}”</span>}
                 </span>
-                <div className="-mt-0.5">
-                  <p className={`font-medium ${done ? '' : 'text-stone-400'}`}>{step.label}</p>
-                  {at && <p className="text-xs text-stone-500">{fmtTime(at)}</p>}
-                </div>
+                <span className="tabular-nums">{money(it.price * it.qty)}</span>
               </li>
-            );
-          })}
-        </ol>
-      )}
+            ))}
+          </ul>
+          {order.note && <p className="mt-2 text-xs italic text-stone-500">Note for the kitchen: {order.note}</p>}
+          <dl className="mt-4 space-y-1.5 border-t border-stone-700/15 pt-4 text-sm tabular-nums">
+            <div className="flex justify-between text-stone-600"><dt>Subtotal</dt><dd>{money(order.subtotal)}</dd></div>
+            <div className="flex justify-between text-stone-600"><dt>Tax ({order.taxPercent}%)</dt><dd>{money(order.tax)}</dd></div>
+            <div className="flex justify-between pt-1 text-base font-medium text-stone-900"><dt>Total</dt><dd>{money(order.total)}</dd></div>
+          </dl>
+        </section>
 
-      <section className="mx-4 rounded-2xl border border-stone-200 p-4">
-        <h2 className="font-semibold">Your order{order.customerName && ` · ${order.customerName}`}</h2>
-        <ul className="mt-3 space-y-2 text-sm">
-          {order.items.map((it, i) => (
-            <li key={i} className="flex items-start gap-2">
-              <span className="mt-0.5"><VegMark isVeg={it.isVeg} /></span>
-              <span className="flex-1">
-                {it.qty} × {it.name}
-                {it.note && <span className="block text-xs text-stone-500">“{it.note}”</span>}
-              </span>
-              <span>{money(it.price * it.qty)}</span>
-            </li>
-          ))}
-        </ul>
-        {order.note && <p className="mt-3 rounded-lg bg-stone-50 p-2 text-xs text-stone-600">Note: {order.note}</p>}
-        <dl className="mt-4 space-y-1 border-t border-stone-100 pt-3 text-sm">
-          <div className="flex justify-between"><dt>Subtotal</dt><dd>{money(order.subtotal)}</dd></div>
-          <div className="flex justify-between text-stone-600"><dt>Tax ({order.taxPercent}%)</dt><dd>{money(order.tax)}</dd></div>
-          <div className="flex justify-between font-semibold"><dt>Total</dt><dd>{money(order.total)}</dd></div>
-        </dl>
-      </section>
-
-      {menuPath && (
-        <div className="px-4 pt-6">
-          <Link to={menuPath} className="btn-ghost w-full py-3">+ Order more</Link>
-        </div>
-      )}
-      <p className="mt-6 text-center text-xs text-stone-400">Placed at {fmtTime(order.createdAt)} · updates automatically</p>
+        {menuPath && (
+          <Link to={menuPath} className="btn-ghost mt-10 w-full py-3.5">Order something else</Link>
+        )}
+        <p className="mt-8 text-center text-xs text-stone-500">Placed at {fmtTime(order.createdAt)} · this page updates by itself</p>
+      </div>
     </div>
   );
 }
