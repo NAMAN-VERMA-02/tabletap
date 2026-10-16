@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
+// Bump when files in /public/images are replaced: images are cached for 30 days,
+// so a new version tag makes browsers fetch the new files.
+const IMAGE_VERSION = 2;
+const versioned = (src) => (src?.startsWith('/images/') ? `${src}?v=${IMAGE_VERSION}` : src);
+
 // Warm tones shown while an image loads, or if it hasn't been added yet.
 const TONES = {
   sand: 'from-[#d9d2c3] via-[#cfc6b4] to-[#bdb29c]',
@@ -29,7 +34,7 @@ export default function Photo({ src, alt = '', tone = 'sand', className = '', im
       {src && state !== 'error' && (
         <img
           ref={ref}
-          src={src}
+          src={versioned(src)}
           alt={alt}
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
