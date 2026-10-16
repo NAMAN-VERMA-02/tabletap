@@ -96,6 +96,14 @@ tabletap/
 - **Analytics in the restaurant's timezone.** Days and hours are bucketed in local time, and empty days and hours are filled in so the charts have no gaps.
 - **Code-split frontend.** Diners scanning a QR don't download the dashboard or chart code.
 
+- **Login works in every browser.** In production the frontend proxies `/api` to the server, so the auth cookie is first-party, and Safari doesn't block it. The live websocket connects straight to the API using a 5-minute socket token, since the frontend host can't proxy websockets.
+
 ## Deployment
-- **API → Render:** root directory `server`, build `npm install`, start `npm start`. Set `NODE_ENV=production`, `MONGO_URI`, `JWT_SECRET` and `CLIENT_URL` (your Vercel URL).
-- **Frontend → Vercel:** root directory `client`. Set `VITE_API_URL` to your Render URL.
+MongoDB Atlas (database) + Render (API) + Vercel (frontend), all on free tiers.
+
+1. **Atlas:** create a free M0 cluster, a database user, and allow network access from `0.0.0.0/0` (Render's IPs change). Copy the connection string.
+2. **Render:** New → Blueprint → this repo. `render.yaml` sets everything up; fill in `MONGO_URI` and `CLIENT_URL` (your Vercel URL).
+3. **Vercel:** import the repo with root directory `client`, and set `VITE_SOCKET_URL` to your Render URL. If your Render URL isn't `tabletap-api.onrender.com`, update it in `client/vercel.json`.
+4. **Demo data:** run `npm run seed` in `server/` once, with `MONGO_URI` pointing at Atlas.
+
+The free Render plan sleeps after 15 minutes idle, so the first request after a break takes about 30–50 seconds.

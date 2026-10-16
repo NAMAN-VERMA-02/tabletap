@@ -5,7 +5,8 @@ const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 
 // Verifies a JWT and loads its user. Shared by HTTP routes and Socket.io connections.
-async function userFromToken(token) {
+// `purpose` keeps token types apart: session cookies have none, socket tokens have "socket".
+async function userFromToken(token, purpose) {
   if (!token) throw new ApiError(401, 'Not logged in');
 
   let payload;
@@ -14,6 +15,7 @@ async function userFromToken(token) {
   } catch {
     throw new ApiError(401, 'Session expired, please log in again');
   }
+  if (payload.purpose !== purpose) throw new ApiError(401, 'Invalid token');
 
   const user = await User.findById(payload.id);
   if (!user) throw new ApiError(401, 'User no longer exists');

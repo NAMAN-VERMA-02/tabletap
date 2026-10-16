@@ -11,8 +11,8 @@ const slugify = require('../utils/slugify');
 const cookieOptions = {
   httpOnly: true,
   secure: env.isProd,
-  // Frontend (Vercel) and API (Render) live on different domains in production.
-  sameSite: env.isProd ? 'none' : 'lax',
+  // In production the frontend proxies /api to this server, so the cookie is first-party.
+  sameSite: 'lax',
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
@@ -68,10 +68,18 @@ const logout = (_req, res) => {
   res.json({ success: true });
 };
 
+// GET /api/v1/auth/socket-token — short-lived token for the Socket.io connection.
+// In production the API sits behind the frontend's domain, but websockets connect to the
+// API directly, where the session cookie isn't sent. This token bridges that gap.
+const socketToken = (req, res) => {
+  const token = jwt.sign({ id: req.user._id, purpose: 'socket' }, env.jwtSecret, { expiresIn: '5m' });
+  res.json({ success: true, token });
+};
+
 // GET /api/v1/auth/me
 const me = asyncHandler(async (req, res) => {
   const restaurant = await Restaurant.findById(req.user.restaurant);
   res.json({ success: true, user: req.user, restaurant });
 });
 
-module.exports = { register, login, logout, me };
+module.exports = { register, login, logout, me, socketToken };

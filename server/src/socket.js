@@ -20,15 +20,16 @@ function readCookie(header = '', name) {
 function initSocket(httpServer) {
   io = new Server(httpServer, { cors: { origin: env.clientUrl, credentials: true } });
 
-  // Login is optional: diners connect anonymously, staff are identified by their auth cookie.
+  // Login is optional: diners connect anonymously. Staff are identified by a short-lived
+  // socket token (production, cross-origin) or their session cookie (same origin, e.g. dev).
   io.use(async (socket, next) => {
-    const token = readCookie(socket.handshake.headers.cookie, 'token');
-    if (token) {
-      try {
-        socket.data.user = await userFromToken(token);
-      } catch {
-        /* treat as anonymous */
-      }
+    const socketToken = socket.handshake.auth?.token;
+    const cookieToken = readCookie(socket.handshake.headers.cookie, 'token');
+    try {
+      if (socketToken) socket.data.user = await userFromToken(socketToken, 'socket');
+      else if (cookieToken) socket.data.user = await userFromToken(cookieToken);
+    } catch {
+      /* treat as anonymous */
     }
     next();
   });

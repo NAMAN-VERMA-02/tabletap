@@ -26,8 +26,8 @@ afterAll(async () => {
   await new Promise((resolve) => server.close(resolve));
 });
 
-function socket(cookie) {
-  const s = connect(url, { transports: ['websocket'], extraHeaders: cookie ? { Cookie: cookie } : {} });
+function socket(cookie, auth) {
+  const s = connect(url, { transports: ['websocket'], extraHeaders: cookie ? { Cookie: cookie } : {}, auth });
   sockets.push(s);
   return new Promise((resolve, reject) => {
     s.on('connect', () => resolve(s));
@@ -118,6 +118,31 @@ describe('real-time updates', () => {
     await agent.patch(`/api/v1/orders/${otherOrder._id}/status`).send({ status: 'preparing' });
     await quiet;
     expect(other.trackingToken).not.toBe(placed.trackingToken);
+  });
+
+  it('authenticates staff with a short-lived socket token (production, no cookie)', async () => {
+    const { agent, order } = await setup();
+    const { token } = (await agent.get('/api/v1/auth/socket-token')).body;
+    const kitchen = await socket(null, { token });
+
+    const got = nextEvent(kitchen, 'order:new');
+    await order();
+    expect((await got).items[0].name).toBe('Dosa');
+  });
+
+  it('keeps socket tokens and session tokens apart', async () => {
+    const { agent, cookie, order } = await setup();
+    const { token } = (await agent.get('/api/v1/auth/socket-token')).body;
+
+    // A socket token can't be used as an API login...
+    expect((await request(app).get('/api/v1/auth/me').set('Authorization', `Bearer ${token}`)).status).toBe(401);
+
+    // ...and a session token passed as a socket token doesn't get into the kitchen room.
+    const sessionJwt = cookie.split('=')[1];
+    const imposter = await socket(null, { token: sessionJwt });
+    const quiet = noEvent(imposter, 'order:new');
+    await order();
+    await quiet;
   });
 
   it('refuses to subscribe to unknown or malformed tracking tokens', async () => {

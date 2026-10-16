@@ -40,7 +40,7 @@ export default function Kitchen() {
   }, []);
 
   useEffect(() => {
-    const socket = connectSocket();
+    const socket = connectSocket({ staff: true });
 
     // Refetch on every (re)connect so nothing is missed while offline.
     socket.on('connect', () => {

@@ -1,0 +1,29 @@
+# Render Blueprint for the TableTap API. In Render: New → Blueprint → pick this repo.
+services:
+  - type: web
+    name: tabletap-api
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: server
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "20"
+      # Render's proxy + Vercel's /api rewrite, so rate limits see real visitor IPs.
+      - key: TRUST_PROXY
+        value: "2"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      # MongoDB Atlas connection string (set it in the Render dashboard).
+      - key: MONGO_URI
+        sync: false
+      # Your Vercel URL, e.g. https://tabletap.vercel.app (used for CORS and QR code links).
+      - key: CLIENT_URL
+        sync: false
