@@ -6,10 +6,12 @@ const connectDB = require('../src/config/db');
 const env = require('../src/config/env');
 const app = require('../src/app');
 const { initSocket } = require('../src/socket');
+const { seedDemo } = require('./demoData');
 
 (async () => {
   const mongo = await MongoMemoryServer.create();
   await connectDB(mongo.getUri('tabletap'));
+  if (process.argv.includes('--demo')) await seedDemo();
   const server = http.createServer(app);
   initSocket(server);
   server.listen(env.port, () => {

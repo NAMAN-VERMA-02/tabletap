@@ -5,6 +5,7 @@ const links = [
   { to: '/dashboard', label: 'Overview', end: true },
   { to: '/dashboard/menu', label: 'Menu' },
   { to: '/dashboard/tables', label: 'Tables' },
+  { to: '/dashboard/orders', label: 'Orders' },
   { to: '/kitchen', label: 'Kitchen display ↗' },
 ];
 

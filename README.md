@@ -1,107 +1,100 @@
 # TableTap 🍽️
 
-**QR ordering and a live kitchen display for restaurants.** Diners scan the QR code on their table, browse the menu and order without signing up. Orders show up instantly on the kitchen screen, and diners watch the status update live.
+**QR ordering and a live kitchen display for restaurants.** Diners scan the QR code on their table, browse the menu and order without signing up. Orders show up instantly on the kitchen screen, staff move them along with one tap, and diners watch the status update live on their phone.
 
-> 🚧 Work in progress. Auth is done; menu, tables, ordering and the kitchen display are next.
->
-> **Live demo:** _coming soon_ · **Demo login:** _coming soon_
+> **Live demo:** _coming soon_ · **Demo login:** `demo@tabletap.test` / `demo12345`
 
 ## Tech stack
-- **Frontend:** React (Vite), React Router, Tailwind CSS, Axios
-- **Backend:** Node.js, Express, MongoDB + Mongoose, JWT (httpOnly cookies), Zod validation
-- **Security:** bcrypt password hashing, helmet, CORS, rate-limited login
-- **Testing:** Jest, Supertest, mongodb-memory-server · **CI:** GitHub Actions
+- **Frontend:** React (Vite), React Router, Tailwind CSS, Recharts, Socket.io client
+- **Backend:** Node.js, Express, MongoDB + Mongoose, Socket.io, JWT (httpOnly cookies), Zod validation
+- **Security:** bcrypt, helmet, CORS, rate limiting, per-restaurant data scoping
+- **Testing:** Jest, Supertest, mongodb-memory-server (49 API and real-time tests) · **CI:** GitHub Actions
 
 ## Features
-- [x] Owner sign-up creates a restaurant; JWT auth in httpOnly cookies; owner/staff roles
-- [x] Menu categories and items CRUD (search, filters, veg/non-veg, sold-out toggle for staff)
-- [ ] Image upload to Cloudinary (image URLs work for now)
-- [x] Tables CRUD with QR codes (download, regenerate) and a printable QR sheet
-- [x] Public QR menu (search, veg filter), saved cart, and order placement (prices recalculated on the server)
-- [x] Live kitchen display (Socket.io): New → Preparing → Ready columns, order timers, late-order highlight, new-order chime
-- [x] Live order status for diners (instant over Socket.io, with a slow poll as backup)
-- [x] Strict status rules: orders only move forward, and only the owner can cancel
-- [ ] Analytics dashboard (MongoDB aggregation)
-- [ ] Staff management
+- **Auth and roles:** owner sign-up creates a restaurant; owner and staff roles; JWT in httpOnly cookies
+- **Menu:** categories and dishes with search and filters, veg/non-veg, and a sold-out toggle staff can use
+- **Tables and QR codes:** auto-numbered tables, per-table QR codes (download or regenerate), and a printable A4 QR sheet
+- **Diner ordering:** a mobile QR menu with search, veg filter and a saved cart. The server prices every order itself.
+- **Live kitchen display:** New → Preparing → Ready columns, order timers, late-order highlight, new-order chime
+- **Live order status:** diners see each step instantly over Socket.io
+- **Analytics:** revenue, orders, average order value, busiest hour, revenue per day, top dishes, and orders by hour. One MongoDB `$facet` aggregation computes them all.
+- **Order history:** filter by status and date, with pagination and expandable rows
+
+Still to do: Cloudinary image upload (image URLs work for now) and staff management.
+
+## Run locally
+You need Node 20+. MongoDB is optional for trying it out.
+
+```bash
+# API with a throwaway in-memory database + demo data (no MongoDB needed)
+cd server
+npm install
+npm run dev:demo          # http://localhost:5000
+
+# Frontend (new terminal)
+cd client
+npm install
+npm run dev               # http://localhost:5173  → log in with the demo account above
+```
+
+To use a real database, copy `server/.env.example` to `server/.env` and set `MONGO_URI` (local MongoDB or a free [Atlas](https://www.mongodb.com/atlas) cluster) and `JWT_SECRET`. Then run `npm run seed` once to load the demo restaurant, and `npm run dev`.
+
+Tests (in-memory MongoDB, no setup):
+```bash
+cd server && npm test
+```
 
 ## Project structure
 ```
 tabletap/
-├── client/                 # React app (Vite)
-│   └── src/
-│       ├── components/     # ProtectedRoute, layouts
-│       ├── context/        # AuthContext
-│       ├── lib/api.js      # Axios instance
-│       └── pages/          # Landing, Login, Register, Dashboard
-└── server/                 # Express API
+├── client/src/
+│   ├── pages/          # Dashboard (analytics), Menu, Tables, QrSheet, Orders, Kitchen,
+│   │                   # TableMenu + OrderStatus (diner pages), Login, Register, Landing
+│   ├── components/     # layout, modal, menu/, tables/, order/, kitchen/, analytics/
+│   ├── hooks/useCart.js
+│   ├── context/AuthContext.jsx
+│   └── lib/            # api (axios), socket, format, storage, chime
+└── server/
     ├── src/
-    │   ├── config/         # env + MongoDB connection
-    │   ├── controllers/
-    │   ├── middleware/     # auth (protect/authorize), validate, error
-    │   ├── models/         # User, Restaurant
-    │   ├── routes/
-    │   ├── validators/     # Zod schemas
-    │   ├── app.js
-    │   └── server.js
+    │   ├── models/     # User, Restaurant, Category, MenuItem, Table, Order
+    │   ├── controllers/ routes/ validators/ middleware/
+    │   ├── socket.js   # Socket.io rooms + emit helpers
+    │   ├── app.js, server.js
+    ├── scripts/        # dev-memory (in-memory DB), demoData, seed
     └── tests/
-```
-
-## Run locally
-You need Node 20+ and MongoDB, either installed locally or a free [MongoDB Atlas](https://www.mongodb.com/atlas) cluster.
-
-```bash
-# 1. API
-cd server
-cp .env.example .env     # then set MONGO_URI and JWT_SECRET
-npm install
-npm run dev              # http://localhost:5000
-
-# 2. Frontend (new terminal)
-cd client
-npm install
-npm run dev              # http://localhost:5173
-```
-
-No MongoDB yet? Run `npm run dev:memory` in `server/` instead of `npm run dev`. It uses a throwaway in-memory database, and the data is wiped when you stop it.
-
-Run the API tests (they use an in-memory MongoDB, so no setup is needed):
-```bash
-cd server && npm test
 ```
 
 ## API
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
-| GET | `/api/v1/health` | Public | Health check |
 | POST | `/api/v1/auth/register` | Public | Create owner account + restaurant |
-| POST | `/api/v1/auth/login` | Public | Log in (sets cookie) |
-| POST | `/api/v1/auth/logout` | Public | Clear cookie |
+| POST | `/api/v1/auth/login` · `/logout` | Public | Log in (sets cookie) / log out |
 | GET | `/api/v1/auth/me` | Logged in | Current user + restaurant |
-| GET | `/api/v1/categories` | Owner, staff | List categories with item counts |
-| POST / PATCH / DELETE | `/api/v1/categories[/:id]` | Owner | Create / rename / delete (blocked if it still has items) |
-| GET | `/api/v1/menu-items?category=&search=&available=` | Owner, staff | List / filter items |
-| GET | `/api/v1/menu-items/:id` | Owner, staff | Get one item |
-| POST / PATCH / DELETE | `/api/v1/menu-items[/:id]` | Owner | Create / edit / delete items |
-| PATCH | `/api/v1/menu-items/:id/availability` | Owner, staff | Mark an item sold out / available |
+| GET | `/api/v1/categories` | Owner, staff | Categories with item counts |
+| POST / PATCH / DELETE | `/api/v1/categories[/:id]` | Owner | Create / rename / delete (blocked while it has items) |
+| GET | `/api/v1/menu-items?category=&search=&available=` | Owner, staff | List and filter dishes |
+| POST / PATCH / DELETE | `/api/v1/menu-items[/:id]` | Owner | Create / edit / delete dishes |
+| PATCH | `/api/v1/menu-items/:id/availability` | Owner, staff | Mark sold out / available |
 | GET | `/api/v1/tables` | Owner, staff | List tables |
-| POST / PATCH / DELETE | `/api/v1/tables[/:id]` | Owner | Create (auto-numbered) / edit / delete tables |
-| GET | `/api/v1/tables/:id/qr` | Owner | QR code (PNG data URL) for one table |
-| POST | `/api/v1/tables/:id/regenerate-qr` | Owner | New random QR token; the old printed code stops working |
-| GET | `/api/v1/tables/qr-sheet` | Owner | QR codes for all active tables (print view) |
-
+| POST / PATCH / DELETE | `/api/v1/tables[/:id]` | Owner | Create (auto-numbered) / edit / delete |
+| GET | `/api/v1/tables/:id/qr` · `/tables/qr-sheet` | Owner | QR code for one table / all active tables |
+| POST | `/api/v1/tables/:id/regenerate-qr` | Owner | New QR token; the old printed code stops working |
 | GET | `/api/v1/public/t/:qrToken` | Public (QR) | Restaurant, table and available menu |
 | POST | `/api/v1/public/t/:qrToken/orders` | Public (QR) | Place an order (rate-limited) |
 | GET | `/api/v1/public/orders/:trackingToken` | Public | Order status for the diner |
-
 | GET | `/api/v1/orders?status=&date=&page=&limit=` | Owner, staff | Order history with filters and pagination |
 | GET | `/api/v1/orders/active` | Owner, staff | Open orders for the kitchen, oldest first |
-| PATCH | `/api/v1/orders/:id/status` | Owner, staff (cancel: owner) | Move an order: received → preparing → ready → served |
+| PATCH | `/api/v1/orders/:id/status` | Owner, staff (cancel: owner) | received → preparing → ready → served |
+| GET | `/api/v1/analytics/summary?range=today\|7d\|30d` | Owner | Dashboard numbers (one `$facet` aggregation) |
 
-**Real-time events (Socket.io):** staff sockets are authenticated with the same auth cookie and join `restaurant:<id>`, which gets `order:new` and `order:updated`. Diners join `order:<trackingToken>` and get only their own order's `order:updated`, as the public view.
+**Real-time events (Socket.io):** staff sockets are authenticated with the same auth cookie and join `restaurant:<id>`, which gets `order:new` and `order:updated`. Diners join `order:<trackingToken>` and get only their own order's updates, as the public view.
 
-**Ordering safety:** the server ignores any price the browser sends and prices every order from the database. It copies each dish's name and price into the order, so later menu edits never change old bills. It rejects sold-out dishes and dishes from other restaurants. Tracking links use a random token rather than the database id.
-
-Every query is scoped to the logged-in user's restaurant, so one restaurant can never read or change another's data (covered by tests).
+## Design decisions worth knowing
+- **The server never trusts client prices.** Orders are priced from the database, and each dish's name and price are copied into the order, so later menu edits never change old bills.
+- **Every query is scoped to the user's restaurant.** One restaurant can never read or change another's data, and tests cover this for every resource.
+- **Unguessable public links.** QR codes and tracking links use random tokens instead of database ids, and owners can regenerate a table's QR if a photo of it leaks.
+- **Analytics in the restaurant's timezone.** Days and hours are bucketed in local time, and empty days and hours are filled in so the charts have no gaps.
+- **Code-split frontend.** Diners scanning a QR don't download the dashboard or chart code.
 
 ## Deployment
 - **API → Render:** root directory `server`, build `npm install`, start `npm start`. Set `NODE_ENV=production`, `MONGO_URI`, `JWT_SECRET` and `CLIENT_URL` (your Vercel URL).

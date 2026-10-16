@@ -10,6 +10,7 @@ const menuItemRoutes = require('./routes/menuItemRoutes');
 const tableRoutes = require('./routes/tableRoutes');
 const publicRoutes = require('./routes/publicRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 const { notFound, errorHandler } = require('./middleware/error');
 
 const app = express();
@@ -28,8 +29,7 @@ app.use('/api/v1/menu-items', menuItemRoutes);
 app.use('/api/v1/tables', tableRoutes);
 app.use('/api/v1/public', publicRoutes);
 app.use('/api/v1/orders', orderRoutes);
-
-// Next up: analytics routes.
+app.use('/api/v1/analytics', analyticsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

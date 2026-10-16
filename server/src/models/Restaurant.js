@@ -7,6 +7,8 @@ const restaurantSchema = new mongoose.Schema(
     address: { type: String, trim: true, default: '' },
     currency: { type: String, default: 'INR' },
     taxPercent: { type: Number, default: 5, min: 0, max: 100 },
+    // Used to bucket analytics by the restaurant's local day and hour.
+    timezone: { type: String, default: 'Asia/Kolkata' },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }

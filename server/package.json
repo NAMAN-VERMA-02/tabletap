@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "dev:memory": "node scripts/dev-memory.js",
+    "dev:demo": "node scripts/dev-memory.js --demo",
+    "seed": "node scripts/seed.js",
     "start": "node src/server.js",
     "test": "jest --runInBand"
   },
