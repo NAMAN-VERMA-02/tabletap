@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const menuItemRoutes = require('./routes/menuItemRoutes');
 const tableRoutes = require('./routes/tableRoutes');
+const publicRoutes = require('./routes/publicRoutes');
 const { notFound, errorHandler } = require('./middleware/error');
 
 const app = express();
@@ -24,8 +25,9 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/menu-items', menuItemRoutes);
 app.use('/api/v1/tables', tableRoutes);
+app.use('/api/v1/public', publicRoutes);
 
-// Next up: public (QR menu + ordering), orders, analytics routes.
+// Next up: staff orders (kitchen display), analytics routes.
 
 app.use(notFound);
 app.use(errorHandler);

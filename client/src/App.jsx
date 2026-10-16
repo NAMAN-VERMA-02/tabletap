@@ -7,6 +7,8 @@ import Dashboard from './pages/Dashboard';
 import Menu from './pages/Menu';
 import Tables from './pages/Tables';
 import QrSheet from './pages/QrSheet';
+import TableMenu from './pages/TableMenu';
+import OrderStatus from './pages/OrderStatus';
 import DashboardLayout from './components/DashboardLayout';
 
 export default function App() {
@@ -15,6 +17,10 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      {/* Diner pages (no login) */}
+      <Route path="/t/:qrToken" element={<TableMenu />} />
+      <Route path="/order/:trackingToken" element={<OrderStatus />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardLayout />}>

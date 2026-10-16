@@ -17,9 +17,9 @@
 - [x] Menu categories and items CRUD (search, filters, veg/non-veg, sold-out toggle for staff)
 - [ ] Image upload to Cloudinary (image URLs work for now)
 - [x] Tables CRUD with QR codes (download, regenerate) and a printable QR sheet
-- [ ] Public QR menu, cart and order placement (prices recalculated on the server)
-- [ ] Real-time kitchen display (Socket.io)
-- [ ] Live order status for diners
+- [x] Public QR menu (search, veg filter), saved cart, and order placement (prices recalculated on the server)
+- [x] Order status page for diners (polls every 5s for now)
+- [ ] Real-time kitchen display (Socket.io), which will also make diner status updates instant
 - [ ] Analytics dashboard (MongoDB aggregation)
 - [ ] Staff management
 
@@ -87,6 +87,12 @@ cd server && npm test
 | GET | `/api/v1/tables/:id/qr` | Owner | QR code (PNG data URL) for one table |
 | POST | `/api/v1/tables/:id/regenerate-qr` | Owner | New random QR token; the old printed code stops working |
 | GET | `/api/v1/tables/qr-sheet` | Owner | QR codes for all active tables (print view) |
+
+| GET | `/api/v1/public/t/:qrToken` | Public (QR) | Restaurant, table and available menu |
+| POST | `/api/v1/public/t/:qrToken/orders` | Public (QR) | Place an order (rate-limited) |
+| GET | `/api/v1/public/orders/:trackingToken` | Public | Order status for the diner |
+
+**Ordering safety:** the server ignores any price the browser sends and prices every order from the database. It copies each dish's name and price into the order, so later menu edits never change old bills. It rejects sold-out dishes and dishes from other restaurants. Tracking links use a random token rather than the database id.
 
 Every query is scoped to the logged-in user's restaurant, so one restaurant can never read or change another's data (covered by tests).
 

@@ -5,8 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
 import MenuItemForm from '../components/menu/MenuItemForm';
 import VegMark from '../components/menu/VegMark';
+import { formatMoney } from '../lib/format';
 
-const formatPrice = (n) => `₹${Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+const formatPrice = (n, currency) => formatMoney(n, currency);
 
 export default function Menu() {
   const { user } = useAuth();
