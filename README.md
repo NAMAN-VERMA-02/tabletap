@@ -2,7 +2,9 @@
 
 **QR ordering and a live kitchen display for restaurants.** Diners scan the QR code on their table, browse the menu and order without signing up. Orders show up instantly on the kitchen screen, staff move them along with one tap, and diners watch the status update live on their phone.
 
-> **Live demo:** _coming soon_ · **Demo login:** `demo@tabletap.test` / `demo12345`
+> **Live demo:** [tabletap-blush-phi.vercel.app](https://tabletap-blush-phi.vercel.app) · click **Explore the demo** on the login page (or use `demo@tabletap.test` / `demo12345`)
+>
+> The API runs on Render's free plan, so the first request after a quiet spell can take ~30–50 seconds while it wakes up.
 
 ## Tech stack
 - **Frontend:** React (Vite), React Router, Tailwind CSS, Recharts, Socket.io client
