@@ -16,7 +16,7 @@
 - [x] Owner sign-up creates a restaurant; JWT auth in httpOnly cookies; owner/staff roles
 - [x] Menu categories and items CRUD (search, filters, veg/non-veg, sold-out toggle for staff)
 - [ ] Image upload to Cloudinary (image URLs work for now)
-- [ ] Tables CRUD with printable QR codes
+- [x] Tables CRUD with QR codes (download, regenerate) and a printable QR sheet
 - [ ] Public QR menu, cart and order placement (prices recalculated on the server)
 - [ ] Real-time kitchen display (Socket.io)
 - [ ] Live order status for diners
@@ -82,6 +82,11 @@ cd server && npm test
 | GET | `/api/v1/menu-items/:id` | Owner, staff | Get one item |
 | POST / PATCH / DELETE | `/api/v1/menu-items[/:id]` | Owner | Create / edit / delete items |
 | PATCH | `/api/v1/menu-items/:id/availability` | Owner, staff | Mark an item sold out / available |
+| GET | `/api/v1/tables` | Owner, staff | List tables |
+| POST / PATCH / DELETE | `/api/v1/tables[/:id]` | Owner | Create (auto-numbered) / edit / delete tables |
+| GET | `/api/v1/tables/:id/qr` | Owner | QR code (PNG data URL) for one table |
+| POST | `/api/v1/tables/:id/regenerate-qr` | Owner | New random QR token; the old printed code stops working |
+| GET | `/api/v1/tables/qr-sheet` | Owner | QR codes for all active tables (print view) |
 
 Every query is scoped to the logged-in user's restaurant, so one restaurant can never read or change another's data (covered by tests).
 

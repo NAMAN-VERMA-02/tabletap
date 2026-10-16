@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Menu from './pages/Menu';
+import Tables from './pages/Tables';
+import QrSheet from './pages/QrSheet';
 import DashboardLayout from './components/DashboardLayout';
 
 export default function App() {
@@ -18,7 +20,13 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="menu" element={<Menu />} />
+          <Route path="tables" element={<Tables />} />
         </Route>
+      </Route>
+
+      {/* Full-page print view, outside the dashboard chrome */}
+      <Route element={<ProtectedRoute roles={['owner']} />}>
+        <Route path="/print/qr-codes" element={<QrSheet />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

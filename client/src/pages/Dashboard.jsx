@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 // Overview tab. Analytics get built here later.
 const sections = [
   { name: 'Menu', to: '/dashboard/menu', ready: true },
-  { name: 'Tables & QR codes' },
+  { name: 'Tables & QR codes', to: '/dashboard/tables', ready: true },
   { name: 'Kitchen display' },
   { name: 'Orders' },
   { name: 'Analytics' },

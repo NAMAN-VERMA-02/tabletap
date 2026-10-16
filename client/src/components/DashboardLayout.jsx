@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 const links = [
   { to: '/dashboard', label: 'Overview', end: true },
   { to: '/dashboard/menu', label: 'Menu' },
+  { to: '/dashboard/tables', label: 'Tables' },
 ];
 
 export default function DashboardLayout() {
