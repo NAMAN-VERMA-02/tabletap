@@ -10,7 +10,7 @@
 - **Frontend:** React (Vite), React Router, Tailwind CSS, Recharts, Socket.io client
 - **Backend:** Node.js, Express, MongoDB + Mongoose, Socket.io, JWT (httpOnly cookies), Zod validation
 - **Security:** bcrypt, helmet, CORS, rate limiting, per-restaurant data scoping
-- **Testing:** Jest, Supertest, mongodb-memory-server (49 API and real-time tests) · **CI:** GitHub Actions
+- **Testing:** Jest, Supertest, mongodb-memory-server (56 API, concurrency and real-time tests) · **CI:** GitHub Actions · **Ops:** pino JSON logs, graceful shutdown, Docker
 
 ## Features
 - **Auth and roles:** owner sign-up creates a restaurant; owner and staff roles; JWT in httpOnly cookies
@@ -40,6 +40,8 @@ npm run dev               # http://localhost:5173  → log in with the demo acco
 ```
 
 To use a real database, copy `server/.env.example` to `server/.env` and set `MONGO_URI` (local MongoDB or a free [Atlas](https://www.mongodb.com/atlas) cluster) and `JWT_SECRET`. Then run `npm run seed` once to load the demo restaurant, and `npm run dev`.
+
+Or run the API and MongoDB in containers: `JWT_SECRET=change-me docker compose up --build`.
 
 Tests (in-memory MongoDB, no setup):
 ```bash
@@ -82,7 +84,7 @@ tabletap/
 | GET | `/api/v1/tables/:id/qr` · `/tables/qr-sheet` | Owner | QR code for one table / all active tables |
 | POST | `/api/v1/tables/:id/regenerate-qr` | Owner | New QR token; the old printed code stops working |
 | GET | `/api/v1/public/t/:qrToken` | Public (QR) | Restaurant, table and available menu |
-| POST | `/api/v1/public/t/:qrToken/orders` | Public (QR) | Place an order (rate-limited) |
+| POST | `/api/v1/public/t/:qrToken/orders` | Public (QR) | Place an order (rate-limited; optional `Idempotency-Key` header) |
 | GET | `/api/v1/public/orders/:trackingToken` | Public | Order status for the diner |
 | GET | `/api/v1/orders?status=&date=&page=&limit=` | Owner, staff | Order history with filters and pagination |
 | GET | `/api/v1/orders/active` | Owner, staff | Open orders for the kitchen, oldest first |
@@ -96,6 +98,7 @@ tabletap/
 - **Every query is scoped to the user's restaurant.** One restaurant can never read or change another's data, and tests cover this for every resource.
 - **Unguessable public links.** QR codes and tracking links use random tokens instead of database ids, and owners can regenerate a table's QR if a photo of it leaks.
 - **Analytics in the restaurant's timezone.** Days and hours are bucketed in local time, and empty days and hours are filled in so the charts have no gaps.
+- **Retries can't double-order.** Clients may send an `Idempotency-Key` header; a unique index makes one key create one order, even when identical requests arrive at the same moment. Status changes are atomic too. See [ARCHITECTURE.md](ARCHITECTURE.md), [TESTING.md](TESTING.md) and [BENCHMARKS.md](BENCHMARKS.md).
 - **Code-split frontend.** Diners scanning a QR don't download the dashboard or chart code.
 
 - **Login works in every browser.** In production the frontend proxies `/api` to the server, so the auth cookie is first-party, and Safari doesn't block it. The live websocket connects straight to the API using a 5-minute socket token, since the frontend host can't proxy websockets.

@@ -46,6 +46,13 @@ const getTableMenu = asyncHandler(async (req, res) => {
 const placeOrder = asyncHandler(async (req, res) => {
   const { table, restaurant } = await resolveTable(req.params.qrToken);
   const { items: requested, customerName = '', note = '' } = req.body;
+  const idempotencyKey = req.idempotencyKey;
+
+  // A retry of an order we already took returns that order instead of creating a second one.
+  if (idempotencyKey) {
+    const existing = await Order.findOne({ table: table._id, idempotencyKey });
+    if (existing) return res.status(200).json({ success: true, replayed: true, order: publicOrder(existing) });
+  }
 
   // Look up every dish in THIS restaurant's menu. Prices come from here, never from the client.
   const ids = [...new Set(requested.map((l) => l.menuItem))];
@@ -68,16 +75,27 @@ const placeOrder = asyncHandler(async (req, res) => {
   });
   const totals = priceOrder(lines, restaurant.taxPercent);
 
-  const order = await Order.create({
-    restaurant: restaurant._id,
-    table: table._id,
-    tableNumber: table.number,
-    items: lines,
-    taxPercent: restaurant.taxPercent,
-    ...totals,
-    customerName,
-    note,
-  });
+  let order;
+  try {
+    order = await Order.create({
+      restaurant: restaurant._id,
+      table: table._id,
+      tableNumber: table.number,
+      items: lines,
+      taxPercent: restaurant.taxPercent,
+      ...totals,
+      customerName,
+      note,
+      idempotencyKey,
+    });
+  } catch (err) {
+    // Two identical requests raced past the check above; the unique index let only one win.
+    if (idempotencyKey && err.code === 11000) {
+      const winner = await Order.findOne({ table: table._id, idempotencyKey });
+      if (winner) return res.status(200).json({ success: true, replayed: true, order: publicOrder(winner) });
+    }
+    throw err;
+  }
 
   emitOrderNew(order.toObject());
 

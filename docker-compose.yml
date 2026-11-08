@@ -1,0 +1,20 @@
+# One command: `JWT_SECRET=change-me docker compose up --build`  ->  API on http://localhost:5000
+services:
+  mongo:
+    image: mongo:7
+    volumes: [mongo-data:/data/db]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      retries: 10
+  api:
+    build: ./server
+    ports: ["5000:5000"]
+    environment:
+      MONGO_URI: mongodb://mongo:27017/tabletap
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:5173}
+    depends_on:
+      mongo: { condition: service_healthy }
+volumes:
+  mongo-data:

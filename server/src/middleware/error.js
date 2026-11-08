@@ -4,7 +4,7 @@ const ApiError = require('../utils/ApiError');
 const notFound = (req, _res, next) => next(new ApiError(404, `Route not found: ${req.method} ${req.originalUrl}`));
 
 // eslint-disable-next-line no-unused-vars
-const errorHandler = (err, _req, res, _next) => {
+const errorHandler = (err, req, res, _next) => {
   let status = err.statusCode || 500;
   let message = err.message || 'Something went wrong';
   let details = err.details;
@@ -22,7 +22,7 @@ const errorHandler = (err, _req, res, _next) => {
     details = Object.values(err.errors).map((e) => ({ field: e.path, message: e.message }));
   }
 
-  if (status === 500 && !env.isProd) console.error(err);
+  if (status === 500) req.log.error({ err }, 'unhandled error');
 
   res.status(status).json({
     success: false,

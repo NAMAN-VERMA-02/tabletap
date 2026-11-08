@@ -39,10 +39,17 @@ const orderSchema = new mongoose.Schema(
       unique: true,
       default: () => crypto.randomBytes(12).toString('hex'),
     },
+    // Client-chosen key so a retried or double-tapped request returns the same order.
+    idempotencyKey: { type: String },
   },
   { timestamps: true }
 );
 
+// Unique per table, and only for orders that carry a key (older orders and keyless ones are exempt).
+orderSchema.index(
+  { table: 1, idempotencyKey: 1 },
+  { unique: true, partialFilterExpression: { idempotencyKey: { $type: 'string' } } }
+);
 orderSchema.index({ restaurant: 1, status: 1, createdAt: -1 });
 orderSchema.index({ restaurant: 1, createdAt: -1 });
 
