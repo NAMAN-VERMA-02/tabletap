@@ -61,10 +61,16 @@ const updateStatus = asyncHandler(async (req, res) => {
     throw new ApiError(409, `Can't move an order from "${order.status}" to "${status}"`);
   }
 
-  order.status = status;
-  await order.save();
+  // Conditional on the status we just checked, so two simultaneous requests can't both apply the same
+  // transition (the loser sees the new status and gets a 409).
+  const updated = await Order.findOneAndUpdate(
+    { _id: order._id, status: order.status },
+    { $set: { status }, $push: { statusHistory: { status } } },
+    { new: true }
+  );
+  if (!updated) throw new ApiError(409, 'This order was just updated by someone else. Please refresh.');
 
-  const plain = order.toObject();
+  const plain = updated.toObject();
   emitOrderUpdated(plain);
   res.json({ success: true, order: plain });
 });

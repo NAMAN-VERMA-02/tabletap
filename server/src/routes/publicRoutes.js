@@ -25,7 +25,16 @@ const orderLimiter = rateLimit({
 });
 
 router.get('/t/:qrToken', getTableMenu);
-router.post('/t/:qrToken/orders', orderLimiter, validate(placeOrderSchema), placeOrder);
+// Optional `Idempotency-Key` header: 8-64 chars of letters, digits, `-` or `_`.
+const readIdempotencyKey = (req, _res, next) => {
+  const key = req.get('Idempotency-Key');
+  if (key === undefined) return next();
+  if (!/^[A-Za-z0-9_-]{8,64}$/.test(key)) return next(new ApiError(400, 'Invalid Idempotency-Key header'));
+  req.idempotencyKey = key;
+  next();
+};
+
+router.post('/t/:qrToken/orders', orderLimiter, readIdempotencyKey, validate(placeOrderSchema), placeOrder);
 router.get('/orders/:trackingToken', trackOrder);
 
 module.exports = router;

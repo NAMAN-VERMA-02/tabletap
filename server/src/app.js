@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const morgan = require('morgan');
+const pinoHttp = require('pino-http');
+const logger = require('./config/logger');
 const cookieParser = require('cookie-parser');
 const env = require('./config/env');
 const authRoutes = require('./routes/authRoutes');
@@ -22,7 +23,7 @@ app.use(helmet());
 app.use(cors({ origin: env.clientUrl, credentials: true }));
 app.use(express.json({ limit: '100kb' }));
 app.use(cookieParser());
-if (env.nodeEnv === 'development') app.use(morgan('dev'));
+app.use(pinoHttp({ logger, autoLogging: { ignore: (req) => req.url === '/api/v1/health' } }));
 
 app.get('/api/v1/health', (_req, res) => res.json({ success: true, status: 'ok' }));
 app.use('/api/v1/auth', authRoutes);
